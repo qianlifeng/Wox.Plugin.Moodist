@@ -1,3 +1,1 @@
-# Wox.Plugin.Template.Nodejs
-
-Plugin template for nodejs plugin
+Inspired by https://github.com/remvze/moodist
