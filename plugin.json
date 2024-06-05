@@ -1,20 +1,24 @@
 {
-  "Id": "[Id]",
+  "Id": "b5f1cd20-c38f-4c5f-8450-fdd066928e98",
   "TriggerKeywords": [
-    "[Trigger Keyword]"
+    "moodist"
   ],
-  "Name": "[Name]",
-  "Description": "[Description]",
-  "Author": "[Author Name]",
+  "Name": "Moodist",
+  "Description": "Ambient sounds for focus and calm. Inspired by https://github.com/remvze/moodist",
+  "Author": "qianlifeng",
   "Version": "0.0.1",
   "MinWoxVersion": "2.0.0",
-  "Runtime": "[Runtime]",
-  "Website": "[Website]",
+  "Runtime": "nodejs",
+  "Website": "https://github.com/qianlifeng/Wox.Plugin.Moodist",
   "Entry": "index.js",
   "Icon": "relative:images/app.png",
   "SupportedOS": [
     "windows",
-    "linux",
     "darwin"
+  ],
+  "Features": [
+    {
+      "Name": "ignoreAutoScore"
+    }
   ]
 }
