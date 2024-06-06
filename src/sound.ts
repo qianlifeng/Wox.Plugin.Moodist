@@ -15,7 +15,7 @@ function getSounds(): Sound[] {
     for (const sound of fs.readdirSync(`${soundDir}/${soundGroup}`)) {
       const path = `${soundDir}/${soundGroup}/${sound}`
       sounds.push({
-        Name: sound.replace(".mp3", ""),
+        Name: sound.replace(".mp3", "").replace(".wav", ""),
         Group: soundGroup,
         Path: path
       })

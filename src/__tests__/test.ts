@@ -1,6 +1,7 @@
 import { getSounds } from "../sound"
 import { plugin } from "../index"
 import { Context, PublicAPI, Query } from "@wox-launcher/wox-plugin"
+import play from "../player"
 
 test("get sounds", async () => {
   const sounds = getSounds()
@@ -31,4 +32,12 @@ test("query", async () => {
   })
   const results = await plugin.query(ctx, query)
   expect(results.length).toBeGreaterThan(0)
+})
+
+
+test("play and pause", async () => {
+  const sounds = getSounds()
+  const player = play(sounds[0].Path)
+  await new Promise((resolve) => setTimeout(resolve, 3000))
+  player.stop()
 })

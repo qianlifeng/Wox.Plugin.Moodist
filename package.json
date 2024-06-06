@@ -28,8 +28,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@wox-launcher/wox-plugin": "^0.0.67",
-    "audio-loader": "^1.0.3",
-    "audio-play": "^2.3.1"
+    "@wox-launcher/wox-plugin": "^0.0.67"
   }
 }

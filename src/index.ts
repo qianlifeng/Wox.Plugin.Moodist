@@ -1,19 +1,36 @@
 import { Context, Plugin, PluginInitParams, PublicAPI, Query, Result } from "@wox-launcher/wox-plugin"
 import { getSounds, Sound } from "./sound"
-import play from "audio-play"
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import load from "audio-loader"
+import play, { Player } from "./player"
 
 let api: PublicAPI
 let sounds: Sound[]
-const playingHandles: Record<string, play.AudioPlayHandle> = {}
+const playingHandles: Record<string, Player> = {}
+const playingCount: Record<string, number> = {}
+
+async function refresh(ctx: Context, query: Query) {
+  await api.ChangeQuery(ctx, {
+    QueryType: query.Type,
+    QueryText: query.RawQuery,
+    QuerySelection: query.Selection
+  })
+}
+
+// exit all playing sounds when the nodejs process exits
+process.on("exit", () => {
+  for (const sound in playingHandles) {
+    playingHandles[sound].stop()
+  }
+})
 
 export const plugin: Plugin = {
   init: async (ctx: Context, initParams: PluginInitParams) => {
     api = initParams.API
     sounds = getSounds()
     await api.Log(ctx, "Info", `Loaded ${sounds.length} sound groups`)
+    const playingCountStr = await api.GetSetting(ctx, "playingCount")
+    if (playingCountStr) {
+      Object.assign(playingCount, JSON.parse(playingCountStr))
+    }
   },
 
   query: async (ctx: Context, query: Query): Promise<Result[]> => {
@@ -25,30 +42,31 @@ export const plugin: Plugin = {
         sound.Group.toLowerCase().includes(query.Search.toLowerCase()) ||
         query.Search === "") {
         results.push({
-          Title: sound.Name + `${playingHandles[sound.Name] ? " (Playing)" : ""}`,
-          SubTitle: sound.Group,
+          Title: sound.Name,
+          SubTitle: sound.Group + `${playingHandles[sound.Name] ? " - playing" : ""}`,
           Icon: {
             ImageType: "relative",
-            ImageData: "images/app.png"
+            ImageData: `${playingHandles[sound.Name] ? "images/play.png" : "images/app.png"}`
           },
-          Score: sounds.length - i + (playingHandles[sound.Name] ? 1000 : 0),
+          Score: sounds.length - i + (playingHandles[sound.Name] ? 10000000 : 0) + (playingCount[sound.Name] || 0) * 100,
           Actions: [
             {
               Name: "Play or pause",
               PreventHideAfterAction: true,
               Action: async () => {
                 if (playingHandles[sound.Name]) {
-                  playingHandles[sound.Name].pause()
+                  await api.Log(ctx, "Info", `Stopping ${sound.Name}`)
+                  playingHandles[sound.Name].stop()
                   delete playingHandles[sound.Name]
+                  await refresh(ctx, query)
                   return
                 }
 
-                const soundBuffer = await load(sound.Path)
-                playingHandles[sound.Name] = play(soundBuffer, {
-                  loop: true,
-                  autoplay: true
-                }, () => {
-                })
+                await api.Log(ctx, "Info", `Playing ${sound.Name}`)
+                playingHandles[sound.Name] = play(sound.Path)
+                playingCount[sound.Name] = (playingCount[sound.Name] || 0) + 1
+                await api.SaveSetting(ctx, "playingCount", JSON.stringify(playingCount), false)
+                await refresh(ctx, query)
               }
             }
           ]
